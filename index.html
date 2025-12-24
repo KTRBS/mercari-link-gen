@@ -72,6 +72,11 @@
         #openButton:hover {
             background-color: #e65b50;
         }
+        .note {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +89,8 @@
     <input type="text" id="priceMax" placeholder="例: 5000（空欄で制限なし）">
 
     <button id="generateBtn">リンクを生成する</button>
+
+    <p class="note">※ スマホ本体カテゴリ（category_id=859）を自動で適用しています<br>※ 販売中の商品のみ表示</p>
     
     <div id="linkArea">
         <p style="color: #999;">ボタンを押すとここにリンクが表示されます</p>
@@ -103,7 +110,12 @@
             }
 
             let url = 'https://jp.mercari.com/search?keyword=' + encodeURIComponent(keyword);
-            url += '&status=on_sale'; // 販売中のみ
+            
+            // スマホ本体カテゴリを固定
+            url += '&category_id=859';
+            
+            // 販売中のみ
+            url += '&status=on_sale';
 
             const priceMax = priceMaxInput.value.trim();
             if (priceMax && !isNaN(priceMax) && priceMax > 0) {
@@ -117,13 +129,12 @@
                 <button id="openButton">このリンクを新しいタブで開く</button>
             `;
 
-            // 新しく生成されたボタンにイベントを付与
             document.getElementById('openButton').onclick = () => window.open(url, '_blank');
         }
 
         generateBtn.addEventListener('click', generateLink);
 
-        // Enterキーでも生成できるように（便利）
+        // Enterキーでも生成可能
         keywordInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') generateLink();
         });
