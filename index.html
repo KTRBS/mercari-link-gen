@@ -30,14 +30,23 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        .checkbox-area {
+        .sort-options {
             margin-top: 20px;
             display: flex;
             align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
         }
-        .checkbox-area input[type="checkbox"] {
+        .sort-options label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+            margin-top: 0;
+        }
+        .sort-options input[type="checkbox"] {
             width: auto;
-            margin-right: 10px;
+            margin-right: 8px;
             transform: scale(1.3);
         }
         button#generateBtn {
@@ -96,12 +105,16 @@
     <input type="text" id="keyword" placeholder="例: iPhone ジャンク">
     
     <label for="priceMax">最大価格（任意、数字のみ）</label>
-    <input type="text" id="priceMax" placeholder="例: 5000（空欄で制限なし）">
+    <input type="text" id="priceMax" placeholder="例: 2500（空欄で制限なし）">
 
-    <div class="checkbox-area">
-        <input type="checkbox" id="sortNewest">
-        <label for="sortNewest" style="display: inline; font-weight: normal; cursor: pointer;">
+    <div class="sort-options">
+        <label>
+            <input type="checkbox" id="sortNewest">
             新しい順にする
+        </label>
+        <label>
+            <input type="checkbox" id="sortCheapest">
+            価格の安い順にする
         </label>
     </div>
 
@@ -110,7 +123,7 @@
     <p class="note">
         ※ スマホ本体カテゴリ（category_id=859）を自動適用<br>
         ※ 販売中の商品のみ表示<br>
-        ※ 「新しい順にする」にチェックを入れると投稿日時の降順になります
+        ※ 並び順は「新しい順」か「安い順」のどちらか一方のみ選択可能です
     </p>
     
     <div id="linkArea">
@@ -120,9 +133,18 @@
     <script>
         const keywordInput = document.getElementById('keyword');
         const priceMaxInput = document.getElementById('priceMax');
-        const sortNewestCheckbox = document.getElementById('sortNewest');
+        const sortNewest = document.getElementById('sortNewest');
+        const sortCheapest = document.getElementById('sortCheapest');
         const generateBtn = document.getElementById('generateBtn');
         const linkArea = document.getElementById('linkArea');
+
+        // 排他制御：片方をチェックしたらもう片方をオフ
+        sortNewest.addEventListener('change', () => {
+            if (sortNewest.checked) sortCheapest.checked = false;
+        });
+        sortCheapest.addEventListener('change', () => {
+            if (sortCheapest.checked) sortNewest.checked = false;
+        });
 
         function generateLink() {
             const keyword = keywordInput.value.trim();
@@ -143,10 +165,13 @@
                 url += '&price_max=' + encodeURIComponent(priceMax);
             }
 
-            // 新しい順（チェックが入っているときのみ）
-            if (sortNewestCheckbox.checked) {
+            // 並び順（排他）
+            if (sortNewest.checked) {
                 url += '&sort=created_time&order=desc';
+            } else if (sortCheapest.checked) {
+                url += '&sort=price&order=asc';
             }
+            // どちらもなし → 並び順指定なし
 
             linkArea.innerHTML = `
                 <p>生成されたリンク：</p>
@@ -160,15 +185,12 @@
 
         generateBtn.addEventListener('click', generateLink);
 
-        // Enterキーでも生成可能
+        // Enterキーでも生成
         keywordInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') generateLink();
         });
         priceMaxInput.addEventListener('keypress', e => {
             if (e.key === 'Enter') generateLink();
-        });
-        sortNewestCheckbox.addEventListener('change', () => {
-            if (keywordInput.value.trim()) generateLink(); // キーワード入力済みなら即反映（便利）
         });
     </script>
 </body>
