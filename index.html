@@ -15,7 +15,7 @@
         }
         h1 {
             text-align: center;
-            color: #ff6f61; /* メルカリっぽい色 */
+            color: #ff6f61;
         }
         label {
             display: block;
@@ -28,6 +28,21 @@
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button#generateBtn {
+            margin-top: 30px;
+            padding: 12px 24px;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button#generateBtn:hover {
+            background-color: #e65b50;
         }
         #linkArea {
             margin-top: 40px;
@@ -36,15 +51,16 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             text-align: center;
-            min-height: 50px;
+            min-height: 80px;
         }
         #generatedLink {
             font-size: 18px;
             word-break: break-all;
+            color: #ff6f61;
+            text-decoration: underline;
         }
         #openButton {
-            display: none;
-            margin-top: 10px;
+            margin-top: 15px;
             padding: 10px 20px;
             background-color: #ff6f61;
             color: white;
@@ -66,49 +82,54 @@
     
     <label for="priceMax">最大価格（任意、数字のみ）</label>
     <input type="text" id="priceMax" placeholder="例: 5000（空欄で制限なし）">
+
+    <button id="generateBtn">リンクを生成する</button>
     
     <div id="linkArea">
-        <p>入力するとここにリンクが表示されます</p>
-        <a id="generatedLink" target="_blank"></a>
-        <button id="openButton">このリンクを開く</button>
+        <p style="color: #999;">ボタンを押すとここにリンクが表示されます</p>
     </div>
 
     <script>
         const keywordInput = document.getElementById('keyword');
         const priceMaxInput = document.getElementById('priceMax');
+        const generateBtn = document.getElementById('generateBtn');
         const linkArea = document.getElementById('linkArea');
-        const generatedLink = document.getElementById('generatedLink');
-        const openButton = document.getElementById('openButton');
 
         function generateLink() {
             const keyword = keywordInput.value.trim();
             if (!keyword) {
-                linkArea.innerHTML = '<p>キーワードを入力してください</p>';
-                openButton.style.display = 'none';
+                linkArea.innerHTML = '<p style="color: red;">キーワードを入力してください</p>';
                 return;
             }
 
             let url = 'https://jp.mercari.com/search?keyword=' + encodeURIComponent(keyword);
-            url += '&status=on_sale'; // 販売中のみ（見本通り）
+            url += '&status=on_sale'; // 販売中のみ
 
             const priceMax = priceMaxInput.value.trim();
             if (priceMax && !isNaN(priceMax) && priceMax > 0) {
                 url += '&price_max=' + encodeURIComponent(priceMax);
             }
 
-            generatedLink.href = url;
-            generatedLink.textContent = url;
+            linkArea.innerHTML = `
+                <p>生成されたリンク：</p>
+                <a id="generatedLink" href="${url}" target="_blank">${url}</a>
+                <br>
+                <button id="openButton">このリンクを新しいタブで開く</button>
+            `;
 
-            openButton.style.display = 'inline-block';
-            openButton.onclick = () => window.open(url, '_blank');
+            // 新しく生成されたボタンにイベントを付与
+            document.getElementById('openButton').onclick = () => window.open(url, '_blank');
         }
 
-        // 入力が変わるたびに生成
-        keywordInput.addEventListener('input', generateLink);
-        priceMaxInput.addEventListener('input', generateLink);
+        generateBtn.addEventListener('click', generateLink);
 
-        // 初期表示
-        generateLink();
+        // Enterキーでも生成できるように（便利）
+        keywordInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') generateLink();
+        });
+        priceMaxInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') generateLink();
+        });
     </script>
 </body>
 </html>
