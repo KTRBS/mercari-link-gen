@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メルカリ検索リンク生成ツール</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #ff6f61; /* メルカリっぽい色 */
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #linkArea {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            min-height: 50px;
+        }
+        #generatedLink {
+            font-size: 18px;
+            word-break: break-all;
+        }
+        #openButton {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #openButton:hover {
+            background-color: #e65b50;
+        }
+    </style>
+</head>
+<body>
+    <h1>メルカリ検索リンク生成ツール</h1>
+    
+    <label for="keyword">キーワード（必須）</label>
+    <input type="text" id="keyword" placeholder="例: Oppo Reno 3a">
+    
+    <label for="priceMax">最大価格（任意、数字のみ）</label>
+    <input type="text" id="priceMax" placeholder="例: 5000（空欄で制限なし）">
+    
+    <div id="linkArea">
+        <p>入力するとここにリンクが表示されます</p>
+        <a id="generatedLink" target="_blank"></a>
+        <button id="openButton">このリンクを開く</button>
+    </div>
+
+    <script>
+        const keywordInput = document.getElementById('keyword');
+        const priceMaxInput = document.getElementById('priceMax');
+        const linkArea = document.getElementById('linkArea');
+        const generatedLink = document.getElementById('generatedLink');
+        const openButton = document.getElementById('openButton');
+
+        function generateLink() {
+            const keyword = keywordInput.value.trim();
+            if (!keyword) {
+                linkArea.innerHTML = '<p>キーワードを入力してください</p>';
+                openButton.style.display = 'none';
+                return;
+            }
+
+            let url = 'https://jp.mercari.com/search?keyword=' + encodeURIComponent(keyword);
+            url += '&status=on_sale'; // 販売中のみ（見本通り）
+
+            const priceMax = priceMaxInput.value.trim();
+            if (priceMax && !isNaN(priceMax) && priceMax > 0) {
+                url += '&price_max=' + encodeURIComponent(priceMax);
+            }
+
+            generatedLink.href = url;
+            generatedLink.textContent = url;
+
+            openButton.style.display = 'inline-block';
+            openButton.onclick = () => window.open(url, '_blank');
+        }
+
+        // 入力が変わるたびに生成
+        keywordInput.addEventListener('input', generateLink);
+        priceMaxInput.addEventListener('input', generateLink);
+
+        // 初期表示
+        generateLink();
+    </script>
+</body>
+</html>
